@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Ingresar &mdash; Picadito{% endblock %}
+{% block content %}
+<section class="form-section">
+    <h1>Ingresar</h1>
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+    <form method="POST" action="/login" class="event-form">
+        <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required placeholder="tu@email.com">
+        </div>
+        <div class="field">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Ingresar</button>
+    </form>
+    <p class="small" style="margin-top:16px;text-align:center">
+        ¿No tenés cuenta? <a href="/registro">Crear cuenta</a>
+    </p>
+</section>
+{% endblock %}

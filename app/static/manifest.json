@@ -1,0 +1,17 @@
+{
+    "name": "Picadito",
+    "short_name": "Picadito",
+    "description": "Armá eventos y juntá gente sin vueltas",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#f9fafb",
+    "theme_color": "#16a34a",
+    "icons": [
+        {
+            "src": "/static/favicon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}

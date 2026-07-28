@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Crear cuenta &mdash; Picadito{% endblock %}
+{% block content %}
+<section class="form-section">
+    <h1>Crear cuenta</h1>
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+    <form method="POST" action="/registro" class="event-form">
+        <div class="field">
+            <label for="name">Nombre</label>
+            <input type="text" id="name" name="name" required placeholder="Ej: Martín">
+        </div>
+        <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required placeholder="tu@email.com">
+        </div>
+        <div class="field">
+            <label for="password">Contraseña</label>
+            <input type="password" id="password" name="password" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary">Crear cuenta</button>
+    </form>
+    <p class="small" style="margin-top:16px;text-align:center">
+        ¿Ya tenés cuenta? <a href="/login">Ingresar</a>
+    </p>
+</section>
+{% endblock %}

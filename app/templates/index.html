@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+    <h1>Armá tu picadito</h1>
+    <p>Creá un evento, compartí el link y que la gente se anote sin tener que registrarse.</p>
+    <a href="/crear" class="btn btn-primary btn-lg">Crear picadito</a>
+</section>
+
+<section class="how">
+    <h2>Cómo funciona</h2>
+    <div class="steps">
+        <div class="step">
+            <div class="step-num">1</div>
+            <h3>Creás el evento</h3>
+            <p>Ponés fecha, lugar y cupo máximo.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">2</div>
+            <h3>Compartís el link</h3>
+            <p>Lo mandás por WhatsApp, Telegram, o como quieras.</p>
+        </div>
+        <div class="step">
+            <div class="step-num">3</div>
+            <h3>La gente se anota</h3>
+            <p>Sin crear cuenta. Solo nombre y listo.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

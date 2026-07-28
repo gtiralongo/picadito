@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}{{ event.title }} &mdash; Picadito{% endblock %}
+{% block content %}
+<section class="event-detail">
+    <div class="event-header">
+        <h1>{{ event.title }}</h1>
+        <div class="event-meta">
+            <p class="meta-date">📅 {{ event.date.strftime("%d/%m/%Y %H:%M") }}</p>
+            {% if event.location %}
+            <p class="meta-location">📍 {{ event.location }}</p>
+            {% endif %}
+            <p class="meta-creator">Organizado por <strong>{{ event.creator_name }}</strong></p>
+        </div>
+    </div>
+
+    {% if event.description %}
+    <div class="event-description">
+        <p>{{ event.description }}</p>
+    </div>
+    {% endif %}
+
+    <div class="event-stats">
+        <div class="stat">
+            <span class="stat-number">{{ event_dict.confirmed_count }}</span>
+            <span class="stat-label">Anotados</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">{{ event_dict.total_guests }}</span>
+            <span class="stat-label">Jugadores</span>
+        </div>
+        {% if event.max_participants > 0 %}
+        <div class="stat">
+            <span class="stat-number">{{ event.max_participants }}</span>
+            <span class="stat-label">Cupo</span>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if event.max_participants > 0 %}
+    <div class="progress-bar">
+        {% set pct = (event_dict.total_guests / event.max_participants * 100)|round %}
+        <div class="progress-fill" style="width: {{ pct if pct <= 100 else 100 }}%"></div>
+    </div>
+    {% endif %}
+
+    {% if series_events %}
+    <div class="series-info">
+        <h2>Más fechas</h2>
+        <div class="series-list">
+            {% for se in series_events %}
+            <a href="/e/{{ se.id }}" class="series-item {% if se.id == event.id %}series-current{% endif %}">
+                <span class="series-date">📅 {{ se.date.strftime("%d/%m %H:%M") }}</span>
+                {% set sc = se.participants|selectattr("status", "equalto", "confirmed")|list %}
+                <span class="series-count">{{ sc|sum(attribute='guests') }}{% if se.max_participants > 0 %}/{{ se.max_participants }}{% endif %}</span>
+                {% if se.status == "cancelled" %}<span class="badge badge-cancelled">Cancelado</span>{% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="participants-list">
+        <h2>Anotados</h2>
+        {% set confirmed = event.participants|selectattr("status", "equalto", "confirmed")|list %}
+        {% if confirmed %}
+        <ul class="list">
+            {% for p in confirmed %}
+            <li class="list-item">
+                <span class="participant-name">{{ p.name }}</span>
+                {% if p.guests > 1 %}
+                <span class="badge">+{{ p.guests - 1 }}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty">Todavía no se anotó nadie. ¡Sé el primero!</p>
+        {% endif %}
+    </div>
+
+    <div class="signup-form">
+        <h2>Anotarme</h2>
+        <form id="signup-form" data-event-id="{{ event.id }}">
+            <div class="field">
+                <label for="name">Nombre</label>
+                <input type="text" id="name" name="name" required placeholder="Tu nombre">
+            </div>
+            <div class="field">
+                <label for="phone">WhatsApp <span class="optional">(opcional)</span></label>
+                <input type="tel" id="phone" name="phone" placeholder="Para que te agreguen al grupo">
+            </div>
+            <div class="field">
+                <label for="guests">¿Llevás a alguien más?</label>
+                <select id="guests" name="guests">
+                    {% for i in range(1, 6) %}
+                    <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Anotarme</button>
+        </form>
+        <div id="signup-success" class="hidden">
+            <div class="success-box">
+                <p>✅ ¡Te anotaste!</p>
+                <p>Guardá este link para cancelar o modificar tu asistencia:</p>
+                <div class="link-box">
+                    <input type="text" id="edit-link" readonly>
+                    <button class="btn btn-small" onclick="copyLink()">Copiar</button>
+                </div>
+                <p class="small">Sin este link no vas a poder cancelar después.</p>
+            </div>
+        </div>
+        <div id="signup-error" class="hidden error-box"></div>
+    </div>
+
+    <div class="share">
+        <h2>Compartir</h2>
+        <div class="link-box">
+            <input type="text" value="{{ site_url }}/e/{{ event.id }}" id="share-link" readonly>
+            <button class="btn btn-small" onclick="copyShareLink()">Copiar</button>
+        </div>
+        <a href="#" id="whatsapp-share" target="_blank" class="btn btn-whatsapp">Compartir por WhatsApp</a>
+    </div>
+
+    <div class="cal-actions" style="margin-top:16px">
+        <h2>Agregar a tu calendario</h2>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+            <a href="/e/{{ event.id }}/ical" class="btn btn-small btn-secondary">📅 ICS (Apple/Outlook)</a>
+            <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.title | urlencode }}&dates={{ event.date.strftime('%Y%m%dT%H%M%S') }}%2F{{ event.date.strftime('%Y%m%dT%H%M%S') }}&details={{ event.description | urlencode }}&location={{ event.location | urlencode }}" target="_blank" class="btn btn-small btn-secondary">📅 Google Calendar</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
