@@ -77,6 +77,85 @@
                 <a href="/e/{{ event.id }}/ical" class="btn btn-small btn-secondary">📅 Descargar ICS</a>
                 <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text={{ event.title | urlencode }}&dates={{ event.date.strftime('%Y%m%dT%H%M%S') }}%2F{{ event.date.strftime('%Y%m%dT%H%M%S') }}&details={{ event.description | urlencode }}&location={{ event.location | urlencode }}" target="_blank" class="btn btn-small btn-secondary">📅 Google Calendar</a>
             </div>
+
+            {% if event.total > 0 %}
+            <div class="cost-box">
+                <div class="cost-item"><span class="cost-label">Total</span><span class="cost-value">${{ event.total }}</span></div>
+                <div class="cost-item"><span class="cost-label">Seña</span><span class="cost-value">${{ event.deposit }}</span></div>
+                <div class="cost-item cost-highlight">
+                    <span class="cost-label">Por persona{% if event.max_participants > 0 %} (cupo {{ event.max_participants }}){% endif %}</span>
+                    <span class="cost-value">${{ event_dict.per_person }}</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% set confirmed = event.participants|selectattr("status", "equalto", "confirmed")|list %}
+        <div class="admin-card">
+            <div class="notif-header">
+                <h2>División de equipos</h2>
+                <form method="POST" action="/admin/{{ event.id }}/{{ event.creator_token }}/equipos/random">
+                    <button type="submit" class="btn btn-small btn-primary">Dividir al azar</button>
+                </form>
+            </div>
+            {% if confirmed %}
+            {% set team1 = confirmed|selectattr("team", "equalto", "1")|list %}
+            {% set team2 = confirmed|selectattr("team", "equalto", "2")|list %}
+            {% set unassigned = [] %}
+            {% for p in confirmed %}{% if p.team != "1" and p.team != "2" %}{% set _ = unassigned.append(p) %}{% endif %}{% endfor %}
+            <div class="teams">
+                <div class="team-card team-card--1">
+                    <h3>Equipo 1 <span class="team-shade">(claro)</span> <span class="badge">{{ team1|length }}</span></h3>
+                    <ul class="list">
+                        {% for p in team1 %}
+                        <li class="list-item">
+                            <span class="participant-name"><span class="avatar avatar--1">{{ p.name[0] }}</span>{{ p.name }}</span>
+                            <form method="POST" action="/admin/{{ event.id }}/{{ event.creator_token }}/participante/{{ p.id }}/equipo">
+                                <input type="hidden" name="team" value="2">
+                                <button type="submit" class="btn btn-small btn-secondary">→</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="team-card team-card--2">
+                    <h3>Equipo 2 <span class="team-shade">(oscuro)</span> <span class="badge">{{ team2|length }}</span></h3>
+                    <ul class="list">
+                        {% for p in team2 %}
+                        <li class="list-item">
+                            <span class="participant-name"><span class="avatar avatar--2">{{ p.name[0] }}</span>{{ p.name }}</span>
+                            <form method="POST" action="/admin/{{ event.id }}/{{ event.creator_token }}/participante/{{ p.id }}/equipo">
+                                <input type="hidden" name="team" value="1">
+                                <button type="submit" class="btn btn-small btn-secondary">←</button>
+                            </form>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="team-card team-unassigned">
+                    <h3>Sin asignar <span class="badge">{{ unassigned|length }}</span></h3>
+                    <ul class="list">
+                        {% for p in unassigned %}
+                        <li class="list-item">
+                            <span class="participant-name"><span class="avatar">{{ p.name[0] }}</span>{{ p.name }}</span>
+                            <div class="team-actions">
+                                <form method="POST" action="/admin/{{ event.id }}/{{ event.creator_token }}/participante/{{ p.id }}/equipo">
+                                    <input type="hidden" name="team" value="1">
+                                    <button type="submit" class="btn btn-small btn-secondary">→ 1</button>
+                                </form>
+                                <form method="POST" action="/admin/{{ event.id }}/{{ event.creator_token }}/participante/{{ p.id }}/equipo">
+                                    <input type="hidden" name="team" value="2">
+                                    <button type="submit" class="btn btn-small btn-secondary">→ 2</button>
+                                </form>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            {% else %}
+            <p class="empty">No hay anotados para dividir.</p>
+            {% endif %}
         </div>
 
         {% if series_events %}
@@ -111,6 +190,18 @@
                     <input type="text" id="location" name="location" value="{{ event.location }}">
                 </div>
                 <div class="field">
+                    <label for="address">Dirección <span class="optional">(para Google Maps)</span></label>
+                    <input type="text" id="address" name="address" value="{{ event.address }}">
+                </div>
+                <div class="field">
+                    <label for="total">Costo total <span class="optional">(0 = sin costo)</span></label>
+                    <input type="number" id="total" name="total" min="0" value="{{ event.total }}">
+                </div>
+                <div class="field">
+                    <label for="deposit">Seña <span class="optional">(opcional)</span></label>
+                    <input type="number" id="deposit" name="deposit" min="0" value="{{ event.deposit }}">
+                </div>
+                <div class="field">
                     <label for="max_participants">Cupo máximo</label>
                     <input type="number" id="max_participants" name="max_participants" min="0" value="{{ event.max_participants }}">
                 </div>
@@ -139,7 +230,7 @@
                     <tbody>
                         {% for p in event.participants %}
                         <tr class="{{ 'cancelled' if p.status == 'cancelled' }}">
-                            <td>{{ p.name }}</td>
+                            <td><span class="participant-name"><span class="avatar">{{ p.name[0] }}</span>{{ p.name }}</span></td>
                             <td>{{ p.phone or '-' }}</td>
                             <td>{{ p.guests }}</td>
                             <td>

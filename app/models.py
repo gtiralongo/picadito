@@ -31,6 +31,9 @@ class Event(Base):
     description = Column(Text, default="")
     date = Column(DateTime, nullable=False)
     location = Column(String(300), default="")
+    address = Column(String(300), default="")
+    total = Column(Integer, default=0)
+    deposit = Column(Integer, default=0)
     max_participants = Column(Integer, default=0)
     creator_name = Column(String(100), nullable=False)
     creator_token = Column(String(64), nullable=False, unique=True)
@@ -55,6 +58,7 @@ class Participant(Base):
     token = Column(String(64), nullable=False, unique=True)
     status = Column(String(20), default="confirmed")
     guests = Column(Integer, default=1)
+    team = Column(String(10), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     event = relationship("Event", back_populates="participants")

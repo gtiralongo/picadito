@@ -10,12 +10,15 @@
     {% if events %}
     <div class="event-list">
         {% for e in events %}
-        <div class="event-card">
+        <div class="event-card {% if e.status == 'cancelled' %}is-cancelled{% endif %}">
             <div class="event-card-body">
                 <h3>{{ e.title }}</h3>
                 <p class="meta-date">📅 {{ e.date.strftime("%d/%m/%Y %H:%M") }}</p>
                 {% if e.location %}
                 <p class="meta-location">📍 {{ e.location }}</p>
+                {% endif %}
+                {% if e.address %}
+                <p class="meta-location">🗺️ <a href="https://www.google.com/maps/search/?api=1&query={{ e.address | urlencode }}" target="_blank" rel="noopener">{{ e.address }}</a></p>
                 {% endif %}
                 {% set confirmed = e.participants|selectattr("status", "equalto", "confirmed")|list %}
                 <p class="meta-count">{{ confirmed|sum(attribute='guests') }} jugador{{ 'es' if confirmed|sum(attribute='guests') != 1 else '' }}{% if e.max_participants > 0 %} / {{ e.max_participants }}{% endif %}</p>

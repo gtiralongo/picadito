@@ -10,6 +10,9 @@
         {% if event.location %}
         <p>📍 {{ event.location }}</p>
         {% endif %}
+        {% if event.address %}
+        <p>🗺️ <a href="https://www.google.com/maps/search/?api=1&query={{ event.address | urlencode }}" target="_blank" rel="noopener">{{ event.address }}</a></p>
+        {% endif %}
 
         {% if participant.status == "confirmed" %}
         <div class="alert alert-success">Estás anotado ✅</div>

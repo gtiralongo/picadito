@@ -1,3 +1,4 @@
+import random
 import uuid
 from datetime import datetime
 
@@ -19,12 +20,21 @@ def make_token():
 
 def event_to_dict(event: Event):
     confirmed = [p for p in event.participants if p.status == "confirmed"]
+    per_person = 0
+    if event.total > 0:
+        denom = event.max_participants if event.max_participants > 0 else len(confirmed)
+        if denom > 0:
+            per_person = -(-event.total // denom)
     return {
         "id": event.id,
         "title": event.title,
         "description": event.description,
         "date": event.date,
         "location": event.location,
+        "address": event.address,
+        "total": event.total,
+        "deposit": event.deposit,
+        "per_person": per_person,
         "max_participants": event.max_participants,
         "creator_name": event.creator_name,
         "created_at": event.created_at,
@@ -56,6 +66,9 @@ def create_event(
     description: str = Form(""),
     date: str = Form(...),
     location: str = Form(""),
+    address: str = Form(""),
+    total: int = Form(0),
+    deposit: int = Form(0),
     max_participants: int = Form(0),
     creator_name: str = Form(...),
     db: Session = Depends(get_db),
@@ -71,6 +84,9 @@ def create_event(
         description=description,
         date=event_date,
         location=location,
+        address=address,
+        total=max(total, 0),
+        deposit=max(deposit, 0),
         max_participants=max_participants,
         creator_name=creator_name,
         creator_token=make_token(),
@@ -254,6 +270,9 @@ def edit_event(
     description: str = Form(""),
     date: str = Form(...),
     location: str = Form(""),
+    address: str = Form(""),
+    total: int = Form(0),
+    deposit: int = Form(0),
     max_participants: int = Form(0),
     db: Session = Depends(get_db),
 ):
@@ -270,6 +289,9 @@ def edit_event(
     event.description = description
     event.date = event_date
     event.location = location
+    event.address = address
+    event.total = max(total, 0)
+    event.deposit = max(deposit, 0)
     event.max_participants = max_participants
     db.commit()
 
@@ -299,6 +321,9 @@ def repeat_event(
         description=original.description,
         date=new_date,
         location=original.location,
+        address=original.address,
+        total=original.total,
+        deposit=original.deposit,
         max_participants=original.max_participants,
         creator_name=original.creator_name,
         creator_token=make_token(),
@@ -381,6 +406,73 @@ def link_event_to_user(
         return RedirectResponse(url="/login", status_code=303)
 
     event.creator_id = user.id
+    db.commit()
+
+    return RedirectResponse(url=f"/admin/{event_id}/{creator_token}", status_code=303)
+
+
+@router.post("/e/{event_id}/participante/{participant_id}/equipo")
+def set_participant_team(
+    request: Request,
+    event_id: str,
+    participant_id: str,
+    team: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event or event.status == "cancelled":
+        raise HTTPException(404, "Evento no encontrado")
+
+    participant = db.query(Participant).filter(
+        Participant.id == participant_id, Participant.event_id == event_id
+    ).first()
+    if not participant or participant.status != "confirmed":
+        raise HTTPException(404, "No encontrado")
+
+    participant.team = team if team in ("1", "2") else None
+    db.commit()
+
+    return RedirectResponse(url=f"/e/{event_id}", status_code=303)
+
+
+@router.post("/admin/{event_id}/{creator_token}/equipos/random")
+def random_teams(
+    event_id: str,
+    creator_token: str,
+    db: Session = Depends(get_db),
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event or event.creator_token != creator_token:
+        raise HTTPException(404, "No encontrado")
+
+    confirmed = [p for p in event.participants if p.status == "confirmed"]
+    random.shuffle(confirmed)
+    for i, p in enumerate(confirmed):
+        p.team = "1" if i % 2 == 0 else "2"
+    db.commit()
+
+    return RedirectResponse(url=f"/admin/{event_id}/{creator_token}", status_code=303)
+
+
+@router.post("/admin/{event_id}/{creator_token}/participante/{participant_id}/equipo")
+def admin_set_participant_team(
+    event_id: str,
+    creator_token: str,
+    participant_id: str,
+    team: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    event = db.query(Event).filter(Event.id == event_id).first()
+    if not event or event.creator_token != creator_token:
+        raise HTTPException(404, "No encontrado")
+
+    participant = db.query(Participant).filter(
+        Participant.id == participant_id, Participant.event_id == event_id
+    ).first()
+    if not participant or participant.status != "confirmed":
+        raise HTTPException(404, "No encontrado")
+
+    participant.team = team if team in ("1", "2") else None
     db.commit()
 
     return RedirectResponse(url=f"/admin/{event_id}/{creator_token}", status_code=303)
