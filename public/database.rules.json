@@ -1,0 +1,1 @@
+{"rules":{".read":false,".write":false,"events":{"$eventId":{".read":true,".write":"auth != null && (!data.exists() || data.child(\"creator_id\").val() == auth.uid)","participants":{".read":true,".write":true}}}}}

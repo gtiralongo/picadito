@@ -10,10 +10,7 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.firestore();
-
-// Habilitar persistencia
-db.enablePersistence().catch(()=>{});
+const db = firebase.database();
 
 // Exportar global
 window.firebaseApp = firebase;
