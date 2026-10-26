@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#16a34a">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <title>Picadito</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="/" class="logo"><span class="logo-mark">⚽</span>Picadito</a>
+            <nav class="nav">
+                <button id="dark-toggle" class="btn-icon" aria-label="Modo oscuro">🌙</button>
+                <span id="user-menu"></span>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main" id="app">
+        <!-- SPA content injected here -->
+    </main>
+
+    <footer class="footer">
+        <p>Picadito — armá el equipo sin vueltas</p>
+    </footer>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="/js/firebase-config.js"></script>
+    <script src="/js/app.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+      }
+    </script>
+</body>
+</html>
