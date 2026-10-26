@@ -7,3 +7,4 @@ aiosqlite==0.20.0
 python-multipart==0.0.20
 bcrypt==5.0.0
 itsdangerous==2.2.0
+firebase-admin==6.8.0
