@@ -1,11 +1,11 @@
 // Configuración de Firebase - reemplazar con tus valores de Firebase Console
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyAGb3pg1tTSfmSYXt-zIcR-JtHaCtFBv-A",
+  authDomain: "picadito-28f4a.firebaseapp.com",
+  projectId: "picadito-28f4a",
+  storageBucket: "picadito-28f4a.firebasestorage.app",
+  messagingSenderId: "560678362563",
+  appId: "1:560678362563:web:e034c0c25996e58650f176"
 };
 
 firebase.initializeApp(firebaseConfig);
